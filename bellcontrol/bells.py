@@ -85,8 +85,10 @@ class LocalBell(_Bell):
 class RemoteBell(_Bell):
     def _netThreadFun(self):
         while True:
+            logging.debug("At top of loop")
             queueData = self._netTimeQueue.get()
-            if queueData >= 0:
+            logging.debug("Received queue data")
+            if queueData >= 0: #turning the bell on for a specific time
                 ringTime = queueData
                 #prepare request
                 params = {'t': ringTime,
@@ -102,7 +104,7 @@ class RemoteBell(_Bell):
                     logging.warning("%s failed to send request. Code: %i",
                                     self.getName(), req.status_code)
                     logging.debug(req.text)
-            else:
+            else: #turning the bell off
                 #prepare request
                 params = {'secret': self._bellSecret}
                 logging.debug("%s placing stop request",
@@ -123,16 +125,19 @@ class RemoteBell(_Bell):
         self._bellSecret = bellSecret
         #setup network thread queue and events
         self._netTimeQueue = queue.Queue()
+        self._netEvent = threading.Event()
         #setup network thread
         self._networkThread = threading.Thread(target=self._netThreadFun, 
                                                daemon=True)
         self._networkThread.start()
 
-    def _turnOnTD(self, ringTime):
-        logging.debug("%s turning on over network")
+    def ring(self, ringTime):
+        logging.info("%s turning on over network for %ims", 
+                     self.getName(),
+                     ringTime)
         self._netTimeQueue.put(ringTime)
 
-    def _turnOff(self):
-        logging.debug("%s turning off over network")
+    def stop(self):
+        logging.info("%s turning off over network", self.getName)
         self._netTimeQueue.put(-1)
         
