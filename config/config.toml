@@ -1,0 +1,34 @@
+[bells]
+	[bells.local.PS_BELL] #locally connected bell
+	pin = 18 #gpio pin on RPi
+	active_low = false #is it active low?
+
+	[bells.remote.HS_BELL] #network bell
+	remote_ip = "1.2.3.4"
+	remote_port = 1234
+	remote_secret = "topsecret"
+
+	# Define functions under [functions.FN_NAME] using the following example:
+	#	[functions.FIRE]
+	#	sequence = [2000, 1000, 2000, 1000, 2000] #on for 2000ms, off for 1000ms, on for 2000ms, off for 1000ms, on for 2000ms
+	#	affecting_bells = ["PS_BELL", "HS_BELL"]
+
+[functions]
+	[functions.RING]
+	sequence = [2000]
+
+	[functions.FIRE]
+	sequence = [2000, 2000, 2000, 2000, 2000] #3 2000ms rings with 2000ms inbetween
+
+[controlbuttons]
+	[controlbuttons.24] #for button on pin 24
+	function = "RING"
+	affecting_bells = ["PS_BELL", "HS_BELL"]
+
+	[controlbuttons.25] #for button on pin 25
+	function = "FIRE"
+	affecting_bells = ["PS_BELL", "HS_BELL"]
+
+	[controlbuttons.26] #for button on pin 26
+	function = "STOP"
+	affecting_bells = ["PS_BELL", "HS_BELL"]

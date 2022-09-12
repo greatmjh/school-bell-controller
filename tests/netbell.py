@@ -1,5 +1,5 @@
 from RPi import GPIO
-from bells import LocalBell, RemoteBell
+from bellcontrol.bells import LocalBell, RemoteBell
 import time
 import logging
 
@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 GPIO.setmode(GPIO.BCM)
 lb = LocalBell("Bell-18", 18)
 lb2 = LocalBell("Bell-25", 25)
-nb = RemoteBell("Net-Bell", "10.1.4.210", "password")
+nb = RemoteBell("Net-Bell", "10.1.4.210", 80, "password")
 
 try:
 	logging.debug("Before 1st ring")
