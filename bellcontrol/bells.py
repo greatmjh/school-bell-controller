@@ -11,7 +11,10 @@ import requests
 # methods for getting the name, ringing, and stopping
 class _Bell:
     def _seqMgrThreadFun(self):
+        logging.debug("a")
         currentSequence = self._seqQueue.get()
+        if self._seqStopEvent.is_set:
+            self._seqStopEvent.clear()
         if currentSequence is not None:
             #a queue has been loaded
             bellOn = True #the bell starts turned on
@@ -37,7 +40,7 @@ class _Bell:
         #setup members
         self._name = bellName
         #setup sequence management thread
-        self._seqMgrThread = threading.Thread(target=self._seqMgrThread,
+        self._seqMgrThread = threading.Thread(target=self._seqMgrThreadFun,
                                               daemon=True)
         self._seqQueue = queue.Queue()
         self._seqStopEvent = threading.Event()
@@ -49,7 +52,7 @@ class _Bell:
         return self._name
 
     def runSequence(self, sequence):
-        self._seqQueue.add(sequence)
+        self._seqQueue.put(sequence)
 
     def stopSequence(self, sequence):
         self._seqStopEvent.set()
@@ -68,7 +71,7 @@ class LocalBell(_Bell):
                 ringTime = self._rtQueue.get()
                 finishTime = time.time() + (ringTime / 1000)
                 ringing = True
-                self._turnOn(ringTime)
+                self._turnOn()
 
             if self._stopEvent.is_set(): #the bell is told to turn off
                 self._stopEvent.clear()

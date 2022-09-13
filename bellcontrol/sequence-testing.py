@@ -1,12 +1,15 @@
 from RPi import GPIO
 import logging
-from bellcontrol.bells import LocalBell
+from bells import LocalBell, RemoteBell
+import time
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(threadName)s: %(message)s')
 GPIO.setmode(GPIO.BCM)
-lb = LocalBell("Bell-18", 18)
+#b = LocalBell("Bell-18", 18)
+b = RemoteBell("RB", "10.1.4.210", 80, "password")
 
 try:
-	lb.runSequence([1000, 1000, 1000])
+	b.runSequence([1000, 1000, 1000, 1000, 1000])
+	time.sleep(10)
 finally:
 	GPIO.cleanup()
