@@ -1,11 +1,20 @@
 import logging
 import time
 import threading
-import queue
+
 
 from RPi import GPIO
 
 class ControlButton:
+    def _handleButtonPress(self):
+        for bell in self._bellNames:
+            logging.info("Button %i triggered fn %s on bell %s",
+                         self._pin,
+                         self._sequence,
+                         bell.getName())
+            bell.runSequence(self._sequence)
+            
+
     def _btnThreadFun(self):
         buttonDown = False
         while True:
@@ -20,17 +29,18 @@ class ControlButton:
                 time.sleep(0.020) #debounce for 20ms
                 buttonDown = False
                 logging.debug("Button on pin %i released", self._pin)
+                self._handleButtonPress()
 
     
-    def __init__(self, gpioPin, sequenceName, bellNames, feedbackQueue):
+    def __init__(self, gpioPin, sequence, bellNames):
         #setup members
         self._pin = gpioPin
-        self._seqName = sequenceName
+        self._sequence = sequence
         self._bellNames = bellNames
-        self._feedbackQueue = feedbackQueue
         #setup gpio pin with pull-up
         GPIO.setup(self._pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         #setup button thread
         self._btnThread = threading.Thread(target=self._btnThreadFun,
-                                           daemon=True)
+                                           daemon=True,
+                                           name=str(gpioPin) + "-btnctl")
         self._btnThread.start()
