@@ -11,37 +11,40 @@ import requests
 # methods for getting the name, ringing, and stopping
 class _Bell:
     def _seqMgrThreadFun(self):
-        logging.debug("a")
-        currentSequence = self._seqQueue.get()
-        if self._seqStopEvent.is_set:
-            self._seqStopEvent.clear()
-        if currentSequence is not None:
-            #a queue has been loaded
-            bellOn = True #the bell starts turned on
-            forceStop = False #for when the sequence needs to be forcibly stopped
-            for currentDelay in currentSequence: #loop through the sequence
-                if bellOn: #if the bell is supposed to be on for this delay cycle, turn it on
-                    self._ringForTime(currentDelay)
-                #wait until the cycle is over
-                finishTime = time.time() + (currentDelay / 1000)
-                while time.time() < finishTime:
-                    if self._seqStopEvent.is_set(): #if a force stop comes through
-                        self._seqStopEvent.clear()
-                        forceStop = True #set flag to exit main loop
-                        break #exit this loop
-                #switch to the opposite cycle (from bell on to waiting)
-                bellOn = not bellOn
-                #if the force stop flag is called, stop the bell and break
-                if (forceStop):
-                    self._stopRinging()
-                    break
+        while True:
+            logging.debug("Waiting for sequence to get sent")
+            currentSequence = self._seqQueue.get()
+            logging.debug("Sequence being processed")
+            if self._seqStopEvent.is_set:
+                self._seqStopEvent.clear()
+            if currentSequence is not None:
+                #a queue has been loaded
+                bellOn = True #the bell starts turned on
+                forceStop = False #for when the sequence needs to be forcibly stopped
+                for currentDelay in currentSequence: #loop through the sequence
+                    if bellOn: #if the bell is supposed to be on for this delay cycle, turn it on
+                        self._ringForTime(currentDelay)
+                    #wait until the cycle is over
+                    finishTime = time.time() + (currentDelay / 1000)
+                    while time.time() < finishTime:
+                        if self._seqStopEvent.is_set(): #if a force stop comes through
+                            self._seqStopEvent.clear()
+                            forceStop = True #set flag to exit main loop
+                            break #exit this loop
+                    #switch to the opposite cycle (from bell on to waiting)
+                    bellOn = not bellOn
+                    #if the force stop flag is called, stop the bell and break
+                    if (forceStop):
+                        self._stopRinging()
+                        break
 
     def __init__(self, bellName):
         #setup members
         self._name = bellName
         #setup sequence management thread
         self._seqMgrThread = threading.Thread(target=self._seqMgrThreadFun,
-                                              daemon=True)
+                                              daemon=True,
+                                              name=(self.getName() + "-seq"))
         self._seqQueue = queue.Queue()
         self._seqStopEvent = threading.Event()
         
@@ -90,7 +93,8 @@ class LocalBell(_Bell):
         self._stopEvent = threading.Event()
         self._rtQueue = queue.Queue()
         self._ringThread = threading.Thread(target=self._ringThreadFun,
-                                            daemon=True)
+                                            daemon=True,
+                                            name=(self.getName() + "-gpio"))
         self._pin = bellPin
         # setup the GPIO pin
         GPIO.setup(bellPin, GPIO.OUT)
@@ -175,7 +179,8 @@ class RemoteBell(_Bell):
         self._netEvent = threading.Event()
         #setup network thread
         self._networkThread = threading.Thread(target=self._netThreadFun, 
-                                               daemon=True)
+                                               daemon=True,
+                                               name=(self.getName() + "-net"))
         self._networkThread.start()
 
     def _ringForTime(self, ringTime):

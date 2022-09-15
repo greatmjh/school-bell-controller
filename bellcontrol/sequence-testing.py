@@ -11,5 +11,7 @@ b = RemoteBell("RB", "10.1.4.210", 80, "password")
 try:
 	b.runSequence([1000, 1000, 1000, 1000, 1000])
 	time.sleep(10)
+	b.runSequence([1000])
+	while True: pass
 finally:
 	GPIO.cleanup()
