@@ -9,7 +9,7 @@ GPIO.setmode(GPIO.BCM)
 
 lb = LocalBell("Bell-18", 18)
 rb = RemoteBell("RB", "10.1.4.210", 80, "password")
-cb = ControlButton(23, [3000], [rb,lb])
+cb = ControlButton(23, [1000, 1000, 1000, 1000, 1000], [rb,lb])
 
 try:
 	while True:
