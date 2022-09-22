@@ -6,6 +6,7 @@ import logging
 import RPi.GPIO as GPIO
 
 import requests
+import urllib3
 
 # define a base class for all bells, which can store a name and has template
 # methods for getting the name, ringing, and stopping
@@ -114,15 +115,19 @@ class RemoteBell(_Bell):
                               self.getName(),
                               seqString)
                 #place request
-                req = requests.get(url="http://{ip}:{port}/seq".format(
-                                                                     ip=self._bellIP,
-                                                                     port=self._bellPort),
-                                   params=params)
-                #check if it worked
-                if req.status_code != 204:
-                    logging.warning("%s failed to send request. Code: %i",
-                                    self.getName(), req.status_code)
-                    logging.debug(req.text)
+                try:
+                    req = requests.get(url="http://{ip}:{port}/seq".format(
+                                                                        ip=self._bellIP,
+                                                                        port=self._bellPort),
+                                    params=params)
+                    #check if it worked
+                    if req.status_code != 204:
+                        logging.warning("%s failed to send request. Code: %i",
+                                        self.getName(), req.status_code)
+                        logging.debug(req.text)
+                except requests.exceptions.ConnectionError:
+                    logging.warning("Unable to connect to remote")
+                
             except queue.Empty:
                 #the queue is empty, this is normal
                 pass
@@ -133,14 +138,19 @@ class RemoteBell(_Bell):
                 logging.debug("%s placing stop request",
                               self.getName())
                 #place request
-                req = requests.get(url="http://{ip}:{port}/off".format(
-                                                                     ip=self._bellIP,
-                                                                     port=self._bellPort),
-                                   params=params)
-                if req.status_code != 204:
-                    logging.warning("%s failed to send request. Code: %i",
-                                    self.getName(), req.status_code)
-                    logging.debug(req.text)
+                try:
+                    req = requests.get(url="http://{ip}:{port}/off".format(
+                                                                        ip=self._bellIP,
+                                                                        port=self._bellPort),
+                                    params=params)
+                    if req.status_code != 204:
+                        logging.warning("%s failed to send request. Code: %i",
+                                        self.getName(), req.status_code)
+                        logging.debug(req.text)                
+
+                except requests.exceptions.ConnectionError:
+                    logging.warning("Unable to connect to remote")
+                
 
     def __init__(self, bellName, bellIP, bellPort, bellSecret):
         #call superclass initialiser
