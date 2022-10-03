@@ -22,6 +22,7 @@ class _Bell:
 class LocalBell(_Bell):
     def _seqMgrThreadFun(self):
         while True:
+            
             logging.debug("Waiting for sequence to get sent")
             currentSequence = self._seqQueue.get()
             logging.debug("Sequence being processed")
@@ -53,6 +54,7 @@ class LocalBell(_Bell):
             self._turnOff()
 
     def __init__(self, bellName, bellPin, activeLow=False):
+        GPIO.setmode(GPIO.BCM)
         # call the superclass's initialiser function
         _Bell.__init__(self, bellName)
 

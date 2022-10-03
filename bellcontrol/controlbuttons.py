@@ -8,7 +8,7 @@ from RPi import GPIO
 class ControlButton:
     def _handleButtonPress(self):
         #when a button press is detected, loop through bells and tell them to ring
-        for bell in self._bellNames:
+        for bell in self._bells:
             if self._sequence == [-1]: #if the button is used to stop bells, stop them
                 logging.info("Button %i stopped bell %s",
                              self._pin,
@@ -39,11 +39,12 @@ class ControlButton:
                 self._handleButtonPress()
 
     
-    def __init__(self, gpioPin, sequence, bellNames):
+    def __init__(self, gpioPin, sequence, bells):
+        GPIO.setmode(GPIO.BCM)
         #setup members
         self._pin = gpioPin
         self._sequence = sequence
-        self._bellNames = bellNames
+        self._bells = bells
         #setup gpio pin with pull-up
         GPIO.setup(self._pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         #setup button thread

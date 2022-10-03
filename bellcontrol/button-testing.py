@@ -8,8 +8,9 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 GPIO.setmode(GPIO.BCM)
 
 lb = LocalBell("Bell-18", 18)
-rb = RemoteBell("RB", "10.1.4.210", 80, "password")
-cb = ControlButton(23, [1000, 1000, 1000, 1000, 1000], [rb,lb])
+rb = RemoteBell("RB", "192.168.0.50", 80, "password")
+ring = ControlButton(25, [2000], [rb,lb])
+fire = ControlButton(23, [1000, 1000, 1000, 1000, 1000], [rb,lb])
 
 try:
 	while True:
