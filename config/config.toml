@@ -1,10 +1,10 @@
 [bells]
-	[bells.local.PS_BELL] #locally connected bell
+	[bells.local.LOCAL] #locally connected bell
 	pin = 18 #gpio pin on RPi
 	active_low = false #is it active low?
 
-	[bells.remote.HS_BELL] #network bell
-	remote_ip = "10.1.4.210"
+	[bells.remote.REMOTE] #network bell
+	remote_ip = "1.2.3.4"
 	remote_port = 80
 	remote_secret = "password"
 
@@ -13,17 +13,17 @@
 	sequence = [2000]
 
 	[functions.FIRE]
-	sequence = [4000, 3000, 4000, 3000, 4000] #3 2000ms rings with 2000ms inbetween
+	sequence = [4000, 3000, 4000, 3000, 4000] #3 4000ms rings with 3000ms inbetween
 
 [controlbuttons]
 	[controlbuttons.23] #for button on pin 24
 	function = "RING"
-	affecting_bells = ["PS_BELL", "HS_BELL"]
+	affecting_bells = ["LOCAL", "REMOTE"]
 
 	[controlbuttons.25] #for button on pin 25
 	function = "FIRE"
-	affecting_bells = ["PS_BELL", "HS_BELL"]
+	affecting_bells = ["LOCAL", "REMOTE"]
 
 	[controlbuttons.26] #for button on pin 26
-	function = "STOP"
-	affecting_bells = ["PS_BELL", "HS_BELL"]
+	function = "STOP" #internal function
+	affecting_bells = ["LOCAL", "REMOTE"]

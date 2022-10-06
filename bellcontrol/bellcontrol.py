@@ -96,7 +96,7 @@ def delContents(folder):
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(threadName)s: %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(threadName)s: %(message)s')
     #parse the config file into bell, button, and function objects
     buttons, functions, bells = parseConfig()
     #prepare for file scanning
@@ -132,6 +132,7 @@ def main():
 
             #run the function on all the bells
             for i in bellList:
+                logging.info("File triggered fn %s on bell %s", sequence, i)
                 bells[i].runSequence(sequence)
 
             #delete the file
