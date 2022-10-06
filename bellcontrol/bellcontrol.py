@@ -1,12 +1,18 @@
 from RPi import GPIO
 import os
 import logging
+import time
+import shutil
+import glob
+
 from controlbuttons import ControlButton
 from bells import LocalBell,RemoteBell
+
 import tomli
 
 #constants
 CONFIG_LOCATION = "../config/config.toml"
+TRIGGER_FOLDER = "../triggers/"
 
 def parseConfig():
     #parse the TOML into a dict
@@ -29,9 +35,9 @@ def parseConfig():
                     bellName = localBell
                     bellPin = configDict["bells"]["local"][bellName]["pin"]
                     activeLow = configDict["bells"]["local"][bellName]["active_low"]
-
+                    #create the object
                     bells[bellName] = LocalBell(bellName, bellPin, activeLow)
-                except KeyError:
+                except KeyError: #data doesnt exist in config
                     logging.warning("Missing data on bell %s. Skipping...", localBell)
         
         if "remote" in configDict["bells"]:
@@ -41,9 +47,9 @@ def parseConfig():
                     bellIP = configDict["bells"]["remote"][bellName]["remote_ip"]
                     bellPort = configDict["bells"]["remote"][bellName]["remote_port"]
                     bellSecret = configDict["bells"]["remote"][bellName]["remote_secret"]
-
+                    #create the object
                     bells[bellName] = RemoteBell(bellName, bellIP, bellPort, bellSecret)
-                except KeyError:
+                except KeyError: #data doesnt exist in config
                     logging.warning("Missing data on bell %s. Skipping...", remoteBell)
 
         
@@ -53,13 +59,14 @@ def parseConfig():
         functions = configDict["functions"]
     except KeyError:
         logging.warning("No functions in config file.")
+    #add the default STOP function
     functions["STOP"] = {"sequence" : [-1]}
 
     #load any buttons
     buttons = {}
     if "controlbuttons" in configDict:
         for button in configDict["controlbuttons"]:
-            if not button.isnumeric():
+            if not button.isnumeric(): #buttons must be defined as their GPIO pin numbers
                 logging.warning("Invalid button pin: %s. Skipping...", button)
                 continue
             try:
@@ -77,14 +84,59 @@ def parseConfig():
 
     return buttons, functions, bells
 
-
+def delContents(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(threadName)s: %(message)s')
     #parse the config file into bell, button, and function objects
     buttons, functions, bells = parseConfig()
+    #prepare for file scanning
+    currentDir = os.path.dirname(__file__)
+    triggerDirAbs = os.path.join(currentDir, TRIGGER_FOLDER)
+    delContents(triggerDirAbs)
+    #main file scannning loop
     while(True):
-        pass
+        time.sleep(0.05) #only poll for files every 50ms
+        triggerDirContents = os.listdir(triggerDirAbs)
+        for relName in triggerDirContents:
+            absName = os.path.join(triggerDirAbs, relName)
+            if not os.path.isfile(absName):
+                logging.warning("Detected directory %s in trigger folder. Deleting...", relName)
+                shutil.rmtree(absName)
+                continue
+
+            #check if the file is a valid fn
+            if not relName in functions:
+                logging.warning("Found invalid fn %s in trigger dir. Deleting...", relName)
+                os.remove(absName)
+            
+            #load the actual sequence
+            sequence = functions[relName]["sequence"]
+
+            #now that we know the file is a valid fn, load the contents
+            fileContents = ""
+            with open(absName, "r") as f:
+                fileContents = f.read()
+            
+            #parse the contents into a list of bells
+            bellList = fileContents.split(";")
+
+            #run the function on all the bells
+            for i in bellList:
+                bells[i].runSequence(sequence)
+
+            #delete the file
+            os.remove(absName)
+
 
 
 
