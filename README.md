@@ -40,7 +40,7 @@ $ sudo su - bell
 $ pip install pipenv
 ```
 
-Modify the configuration file to your needs
+Modify the configuration file to your needs. (Read config documentation further below)
 ```
 $ cd bellctl
 $ nano config/config.toml
@@ -58,7 +58,7 @@ Go back to your user and create a systemd service to automatically start and sto
 $ exit
 $ sudo nano /etc/systemd/system/bellctl.service
 ```
-Paste the following in and save
+Paste the following in and save. Ensure that `ExecStart` is set to the actual path of `launch.sh`
 ```
 [Unit]
 Description=School Bell Controller
@@ -89,7 +89,7 @@ The second part, `functions`, contains on-off sequences the bells follow. These 
 The third part, `controlbuttons` contains definitions for physical buttons connected to GPIO which trigger specific sequences on specific bells. This works a bit differently, since buttons do not have a name assigned to them, just the GPIO pin number. As such, the `24` in `[controlbuttons.24]` refers to the pin in which the button is connected, in BCM numbering. The `function` element must contain the *name* of an existing function that the button runs, and `affecting_bells` must be an **array** of bell names that will be affected by the button. **Buttons must be connected between the GPIO pin and _ground_ in order to work**
 
 ## Software triggers
-As this daemon provides no form of interal schedules, it is recommended to use an external program to trigger the bell. In order to trigger the daemon, a file must be placed in the `triggers` directory with the name being the name of the function being run and the contents being a list of bells that the function must be run on, delimited by semicolons. This can be done in a single command as follows:
+As this daemon provides no form of internal schedules, it is recommended to use an external program to trigger the bell. In order to trigger the daemon, a file must be placed in the `triggers` directory with the name being the name of the function being run and the contents being a list of bells that the function must be run on, delimited by semicolons. This can be done in a single command as follows: (bell names are `BELL1` and `BELL2` and the function name is `FUNCTIONNAME`)
 ```
-$ echo *BELL1;BELL2* > /path/to/repo/triggers/*FUNCTIONNAME*
+$ echo BELL1;BELL2 > /path/to/repo/triggers/FUNCTIONNAME
 ```
