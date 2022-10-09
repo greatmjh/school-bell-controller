@@ -66,6 +66,8 @@ Paste the following in and save. Ensure that `ExecStart` is set to the actual pa
 Description=School Bell Controller
 After=network.target
 StartLimitIntervalSec=0[Service]
+
+[Service]
 Type=simple
 Restart=always
 RestartSec=1
@@ -78,7 +80,7 @@ WantedBy=multi-user.target
 
 Enable and start the service
 ```
-sudo systemctl enable --now bellctl
+$ sudo systemctl enable --now bellctl
 ```
 
 ## The configuration file
