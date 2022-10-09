@@ -1,0 +1,1 @@
+pipenv run python ./bellcontrol/bellcontrol.py
