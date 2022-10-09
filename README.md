@@ -34,10 +34,12 @@ $ sudo cp -r /path/to/repo /home/bell/bellctl
 $ sudo chown -R bell /home/bell/bellctl
 ```
 
-Log in as the bell user and download pipenv in order to run the virtual environment
+Log in as the bell user, download pipenv in order to run the virtual environment, and configure the PATH variable
 ```
 $ sudo su - bell
 $ pip install pipenv
+$ echo export PATH=~/.local/bin:\$PATH >> ~/.bashrc
+$ source ~/.bashrc
 ```
 
 Modify the configuration file to your needs. (Read config documentation further below)
