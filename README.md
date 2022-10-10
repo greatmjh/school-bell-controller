@@ -19,6 +19,11 @@ $ sudo apt upgrade
 $ sudo apt install python3 python3-pip
 ```
 
+Ensure that you time zone is set correctly
+```
+$ sudo timedatectl set-timezone Africa/Johannesburg
+```
+
 Optionally create a secondary user on the Raspberry Pi to run the daemon. Ensure it is part of the GPIO group.
 ```
 $ sudo adduser bell
@@ -96,4 +101,20 @@ The third part, `controlbuttons` contains definitions for physical buttons conne
 As this daemon provides no form of internal schedules, it is recommended to use an external program to trigger the bell. In order to trigger the daemon, a file must be placed in the `triggers` directory with the name being the name of the function being run and the contents being a list of bells that the function must be run on, delimited by semicolons. This can be done in a single command as follows: (bell names are `BELL1` and `BELL2` and the function name is `FUNCTIONNAME`)
 ```
 $ echo BELL1,BELL2 > /path/to/repo/triggers/FUNCTIONNAME
+```
+
+### Cron
+This trigger functionality can be automated using cron, a built-in schedulting application. To configure, run the command `crontab -e` while logged in as the bell user. The online tool https://crontab.guru can help with setting these schedules correctly.
+
+An example configuration could look like this:
+```
+$ crontab -e
+
+...
+...
+
+45 7 * * 1-5 /usr/bin/echo LOCAL,REMOTE > /home/bell/bellctl/triggers/RING #school starts
+45 10 * * 1-5 /usr/bin/echo REMOTE > /home/bell/bellctl/triggers/RING #HS first break starts
+15 11 * * 1-5 /usr/bin/echo REMOTE > /home/bell/bellctl/triggers/RING #HS first break ends
+#etc...
 ```
