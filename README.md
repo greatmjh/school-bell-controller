@@ -39,7 +39,7 @@ $ sudo cp -r /path/to/repo /home/bell/bellctl
 $ sudo chown -R bell /home/bell/bellctl
 ```
 
-Log in as the bell user, download pipenv in order to run the virtual environment, and configure the PATH variable
+Log in as the bell user, and download libraries
 ```
 $ sudo su - bell
 $ pip install rpi-gpio
