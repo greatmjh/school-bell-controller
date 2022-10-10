@@ -9,7 +9,7 @@ This repo contains contains the server, which runs on a Raspberry Pi or similar 
 
 ### Software
 - A python interpreter to run the code. Tested with Python 3.9.2
-- Python package `pipenv` to manage other internal code dependancies
+- Python packages `rpi-gpio`, `tomli`, and `requests`
 
 ## Installation
 Ensure that python is downloaded and up to date:
@@ -37,9 +37,9 @@ $ sudo chown -R bell /home/bell/bellctl
 Log in as the bell user, download pipenv in order to run the virtual environment, and configure the PATH variable
 ```
 $ sudo su - bell
-$ pip install pipenv
-$ echo export PATH=~/.local/bin:\$PATH >> ~/.bashrc
-$ source ~/.bashrc
+$ pip install rpi-gpio
+$ pip install tomli
+$ pip install requests
 ```
 
 Modify the configuration file to your needs. (Read config documentation further below)
@@ -72,7 +72,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=bell
-ExecStart=/home/bell/bellctl/launch.sh
+ExecStart=/usr/bin/python /home/bell/bellctl/bellcontrol/bellcontrol.py
 
 [Install]
 WantedBy=multi-user.target
