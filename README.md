@@ -50,8 +50,7 @@ $ nano config/config.toml
 
 Run the daemon and test functionality
 ```
-$ chmod +x launch.sh
-$ ./launch.sh
+$ python bellcontrol/bellcontrol.py
 ```
 
 
@@ -80,6 +79,7 @@ WantedBy=multi-user.target
 
 Enable and start the service
 ```
+$ sudo systemctl daemon-reload
 $ sudo systemctl enable --now bellctl
 ```
 
@@ -95,5 +95,5 @@ The third part, `controlbuttons` contains definitions for physical buttons conne
 ## Software triggers
 As this daemon provides no form of internal schedules, it is recommended to use an external program to trigger the bell. In order to trigger the daemon, a file must be placed in the `triggers` directory with the name being the name of the function being run and the contents being a list of bells that the function must be run on, delimited by semicolons. This can be done in a single command as follows: (bell names are `BELL1` and `BELL2` and the function name is `FUNCTIONNAME`)
 ```
-$ echo BELL1;BELL2 > /path/to/repo/triggers/FUNCTIONNAME
+$ echo BELL1,BELL2 > /path/to/repo/triggers/FUNCTIONNAME
 ```

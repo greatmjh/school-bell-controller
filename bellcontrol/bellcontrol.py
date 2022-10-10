@@ -102,6 +102,11 @@ def main():
     #prepare for file scanning
     currentDir = os.path.dirname(__file__)
     triggerDirAbs = os.path.join(currentDir, TRIGGER_FOLDER)
+    #create the trigger directory if it doesn't exits
+    try:
+        os.mkdir(triggerDirAbs)
+    except FileExistsError:
+        pass
     delContents(triggerDirAbs)
     #main file scannning loop
     while(True):
@@ -128,7 +133,8 @@ def main():
                 fileContents = f.read()
             
             #parse the contents into a list of bells
-            bellList = fileContents.split(";")
+            fileContents = fileContents.strip()
+            bellList = fileContents.split(",")
 
             #run the function on all the bells
             for i in bellList:

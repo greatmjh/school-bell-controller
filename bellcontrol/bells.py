@@ -75,6 +75,7 @@ class LocalBell(_Bell):
                                               name=(self.getName() + "-seq"))
         self._seqQueue = queue.Queue()
         self._seqStopEvent = threading.Event()
+        self._turnOff()
 
         #start sequence management thread
         self._seqMgrThread.start()
